@@ -1,0 +1,20 @@
+[
+    {
+      "Username": "First",
+      "Password": "password",
+      "Email": "first@test.net",
+      "PhoneNumber": "0661111111"
+    },
+    {
+      "Username": "Second",
+      "Password": "password",
+      "Email": "second@test.net",
+      "PhoneNumber": "0662222222"
+    },
+    {
+      "Username": "Third",
+      "Password": "password",
+      "Email": "third@test.net",
+      "PhoneNumber": "0663333333"
+    }
+]
