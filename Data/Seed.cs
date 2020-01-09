@@ -12,7 +12,7 @@ namespace TestApp.API.Data
         {
             if (!userManager.Users.Any())
             {
-                var userData = System.IO.File.ReadAllText("../Persistence/Data/UserSeedData.json");
+                var userData = System.IO.File.ReadAllText("../TestApp.API/Data/UserSeedData.json");
                 var users = JsonConvert.DeserializeObject<List<User>>(userData);
 
                 var roles = new List<Role>
