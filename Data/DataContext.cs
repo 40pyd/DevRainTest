@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TestApp.API.Data
 {
+    // interfaces implementations are specified by int to have ids as a digit, not Guid
     public class DataContext : IdentityDbContext<User, Role, int, 
         IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>, 
         IdentityRoleClaim<int>, IdentityUserToken<int>>
@@ -18,6 +19,7 @@ namespace TestApp.API.Data
         {
             base.OnModelCreating(builder);
 
+            // generating the rules for db builder to dupport many to many relations for roles
             builder.Entity<UserRole>(userRole => {
                 userRole.HasKey(ur => new {ur.UserId, ur.RoleId});
 

@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -11,16 +8,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using TestApp.API.Controllers;
 using TestApp.API.Data;
 using TestApp.API.Helpers;
@@ -38,13 +33,16 @@ namespace TestApp.API
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+    public void ConfigureServices(IServiceCollection services)
         {
+            // generating db context using in-build db file
+            // connection string is cpecified in appsettings.json 
             services.AddDbContext<DataContext>(x =>
             {
                 x.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            // this is called to allow users to create simple passwords 
             IdentityBuilder builder = services.AddIdentityCore<User>(opt =>
             {
                 opt.Password.RequireDigit = false;
@@ -59,6 +57,7 @@ namespace TestApp.API
             builder.AddRoleManager<RoleManager<Role>>();
             builder.AddSignInManager<SignInManager<User>>();
 
+            // Jwt token authentication module
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
                 {
@@ -72,12 +71,14 @@ namespace TestApp.API
                     };
                 });
 
+            // authorization module for admin service
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("ModeratePhotoRole", policy => policy.RequireRole("Admin", "Moderator"));
             });
             
+            // module for admin methods access
             services.AddControllers(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
@@ -92,10 +93,20 @@ namespace TestApp.API
                 });
 
             services.AddCors();
+            // registring Seed class to be created every time the app starts
             services.AddTransient<Seed>();
+            // registring repositories DI
+            // instances would be deleted at the end of scope they are created in
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBlogRepository, BlogRepository>();
+            // registring automapper instance
             services.AddAutoMapper(typeof(AuthController).Assembly);
+            // swagger is used to provide http control panel UI at path/swagger
+            services.AddSwaggerGen(c => 
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "DevRain API", Version = "v1"});
+                c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -107,6 +118,7 @@ namespace TestApp.API
             }
             else
             {
+                // custom exeption handler for production mode
                 app.UseExceptionHandler(builder =>
                 {
                     builder.Run(async context =>
@@ -122,7 +134,12 @@ namespace TestApp.API
                     });
                 });
             }
-            // app.UseHttpsRedirection();
+            
+            app.UseSwagger();
+            app.UseSwaggerUI(c => 
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "DevRain API V1");
+            });
 
             app.UseRouting();
             app.UseAuthentication();

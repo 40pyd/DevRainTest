@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +20,11 @@ namespace TestApp.API.Controllers
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly UserManager<User> _userManager;
-        public UsersController(IUserRepository repo, IMapper mapper, DataContext context, UserManager<User> userManager)
+        public UsersController(
+            IUserRepository repo, 
+            IMapper mapper, 
+            DataContext context, 
+            UserManager<User> userManager)
         {
             _userManager = userManager;
             _context = context;

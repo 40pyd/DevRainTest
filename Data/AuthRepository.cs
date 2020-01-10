@@ -12,6 +12,7 @@ namespace TestApp.API.Data
             _context = context;
         }
 
+        // method searches for the user by the name, if it's successfull => returns user
         public async Task<User> Login(string username, string password)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.UserName == username);
@@ -22,6 +23,7 @@ namespace TestApp.API.Data
             return user;
         }
 
+        // method tries users password to match 
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
@@ -38,6 +40,7 @@ namespace TestApp.API.Data
 
         public async Task<User> Register(User user, string password)
         {
+            // this lines added just to show password hashing without using Identity
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash(password, out passwordHash, out passwordSalt);
 
@@ -47,6 +50,8 @@ namespace TestApp.API.Data
             return user;
         }
 
+        // security method creates hash and salt for the password
+        // is used than you don't want to implement Idenyity to your project
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA512())

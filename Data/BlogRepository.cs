@@ -26,6 +26,7 @@ namespace TestApp.API.Data
 
         public async Task<Blog> GetBlog(int id)
         {
+            // using IQueryable for lazy loading
             var query = _context.Blogs.AsQueryable();
 
             var blog = await query.FirstOrDefaultAsync(b => b.Id == id);
@@ -37,6 +38,7 @@ namespace TestApp.API.Data
         {
             var blogs = _context.Blogs.OrderByDescending(c => c.Created).AsQueryable();
 
+            // PagedList is a custom class to support pagination on the client
             return await PagedList<Blog>.CreateAsync(blogs, blogParams.PageNumber, blogParams.PageSize);
         }
 

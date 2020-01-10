@@ -1,5 +1,6 @@
 namespace TestApp.API.Helpers
 {
+    // used to support pagination
     public class BlogParams
     {
         private const int maxPageSize = 50;
